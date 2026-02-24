@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/waltersilva3-bit/1024a-backend2/issues"
   },
-  "homepage": "https://github.com/waltersilva3-bit/1024a-backend2#readme"
+  "homepage": "https://github.com/waltersilva3-bit/1024a-backend2#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mysql2": "^3.18.0"
+  }
 }
