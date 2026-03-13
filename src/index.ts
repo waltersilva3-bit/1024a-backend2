@@ -204,4 +204,7 @@ const vetor:{id:number,nome:string,idade:number}[] = [
 
 //FIND Achar alguem maior de 18 anos?
 console.log(vetor.find((x)=>x.idade===18))
-console.log(vetor.filter ((x)=>x.idade===18))
+//FILTER Achar alguem maior de 18 anos?
+console.log(vetor.filter ((x)=>x.idade===33))
+//MAP MAPEIA
+console.log(vetor.map ((x)=>x.idade===33))
