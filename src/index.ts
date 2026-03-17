@@ -208,3 +208,28 @@ console.log(vetor.find((x)=>x.idade===18))
 console.log(vetor.filter ((x)=>x.idade===33))
 //MAP MAPEIA
 console.log(vetor.map ((x)=>x.idade===33))
+
+
+
+// Obtém o cliente
+import mysql from 'mysql2/promise';
+
+// Cria a conexão com o Banco de Dados
+const connection = await mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  database: 'test',
+});
+
+// Using placeholders
+try {
+  const queryPrepare = await connection.prepare(
+    'SELECT * FROM `pessoa`'
+  );
+  const results = await queryPrepare.execute([])
+  console.log(results);
+} catch (err) {
+  console.log(err);
+}
+// Close the connection
+await connection.end();
