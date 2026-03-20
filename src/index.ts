@@ -1,3 +1,4 @@
+/*
 // import type { promises } from "node:dns"
 //import { TIMEOUT } from "node:dns"
 
@@ -195,7 +196,7 @@ console.log("Executei esse código")
 // MAP
 // FIND
 // SPREAD
-
+/*
 const vetor:{id:number,nome:string,idade:number}[] = [
     {id:1,nome:"tere",idade:32},
     {id:1,nome:"Marcelo",idade:67},
@@ -223,11 +224,67 @@ const connection = await mysql.createConnection({
 
 // Using placeholders
 try {
-  const queryPrepare = await connection.prepare(
-    'SELECT * FROM `pessoa`'
-  );
-  const results = await queryPrepare.execute([])
+  const results = await connection.execute('SELECT * FROM `pessoa`')
   console.log(results);
+
+} catch (err) {
+  console.log(err);
+}
+// Close the connection
+await connection.end();
+*/
+/*
+numero = 10;
+var palavra = "Algum texto";
+var bol = true;
+var x = 10;
+x = "Guilherme";
+var vetor = [1, 2, 3, 4, 5];
+vetor[2] = 10;
+vetor.push(6);
+console.log(vetor);
+// vetor = [5,6,7,8,9]
+// import express from 'express'
+// const app = express()
+// app.use(express.json())
+// app.get("/", (req, res) => {
+//     res.send("Olá Mundo!")
+// })
+// app.listen(8000, ()=>{
+//     console.log("Meu servidor está rodando na porta 8000");
+// })
+*/
+
+// Get the client
+import mysql, { type RowDataPacket } from 'mysql2/promise';
+
+interface IPessoa extends RowDataPacket{
+    id:number,
+    nome:string,
+}
+
+// Create the connection to database
+const connection = await mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  database: 'luademel',
+});
+
+// Using placeholders
+try {
+//   const result = 
+//     await connection
+//     .execute('INSERT INTO pessoa (id,nome) VALUES (?,?)',[3,"Maria"])
+//   console.log(result)
+
+  const [dados,campos] = await connection.execute<IPessoa[]>('SELECT * FROM pessoa')
+  console.log(dados[0]);
+  for (let i = 0; i < dados.length; i++) {
+    const element = dados[i];
+    console.log(element?.id,element?.nome)
+
+  }
+
 } catch (err) {
   console.log(err);
 }
