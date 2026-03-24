@@ -256,14 +256,15 @@ console.log(vetor);
 */
 
 // Get the client
-import mysql, { type RowDataPacket } from 'mysql2/promise';
+import mysql, { type RowDataPacket, type Connection } from 'mysql2/promise';
 
-interface IPessoa extends RowDataPacket{
-    id:number,
-    nome:string,
-}
+import express from 'express';
+const app = express()
 
-// Create the connection to database
+//Como cria uma rota no express?
+app.get("/pessoas", async (req,res)=> {
+    let connection: Connection | null = null
+    try {
 const connection = await mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -271,22 +272,37 @@ const connection = await mysql.createConnection({
 });
 
 // Using placeholders
-try {
+
 //   const result = 
 //     await connection
 //     .execute('INSERT INTO pessoa (id,nome) VALUES (?,?)',[3,"Maria"])
 //   console.log(result)
 
   const [dados,campos] = await connection.execute<IPessoa[]>('SELECT * FROM pessoa')
-  console.log(dados[0]);
-  for (let i = 0; i < dados.length; i++) {
-    const element = dados[i];
-    console.log(element?.id,element?.nome)
+  res.status(200).json(dados)
 
-  }
-
+      await connection.end();
 } catch (err) {
-  console.log(err);
+    //TODO:
+    console.log(err);
+    if(connection){
+        await (connection as Connection).end();
+        }
+    }
+})
+app.post("/pessoas",(req,res)=>{
+    //Pegar as informações do usuário  => REQ.body
+    //Conectar com o banco
+    //Inserir
+    //Retornar algo que indique que deu certo
+    
+})
+app.listen(8000,()=>{
+    console.log("Iniciando o servidor na porta 8000")
+})
+
+interface IPessoa extends RowDataPacket{
+    id:number,
+    nome:string,
 }
-// Close the connection
-await connection.end();
+
