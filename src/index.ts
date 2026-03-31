@@ -256,53 +256,113 @@ console.log(vetor);
 */
 
 // Get the client
-import mysql, { type RowDataPacket, type Connection } from 'mysql2/promise';
+import mysql, { type RowDataPacket, type Connection, type ResultSetHeader } from 'mysql2/promise';
+
+//Erro ao passar o id ou o nome
+// status 500
 
 import express from 'express';
 const app = express()
+app.use(express.json())
 
 //Como cria uma rota no express?
-app.get("/pessoas", async (req,res)=> {
-    let connection: Connection | null = null
-    try {
-const connection = await mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  database: 'luademel',
+interface IPessoa extends RowDataPacket {
+    id: number,
+    nome: string,
+}
+
+const connection = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    database: 'luademel',
 });
 
-// Using placeholders
+app.get("/pessoas", async (req, res) => {
+    try {
+        const [dados, campos] =
+            await connection.execute<IPessoa[]>('SELECT * FROM pessoa')
+        res.status(200).json(dados)
+    } catch (err) {
+        console.log(err)
 
-//   const result = 
-//     await connection
-//     .execute('INSERT INTO pessoa (id,nome) VALUES (?,?)',[3,"Maria"])
-//   console.log(result)
-
-  const [dados,campos] = await connection.execute<IPessoa[]>('SELECT * FROM pessoa')
-  res.status(200).json(dados)
-
-      await connection.end();
-} catch (err) {
-    //TODO:
-    console.log(err);
-    if(connection){
-        await (connection as Connection).end();
+            if(err instanceof Error && 'code' in err && err.code==='ECONNREFUSED'){
+            return res.status(500).json({mensagem:"ERRO: Ligue o LARAGON e confira o usuário e senha da conexão"})
+        }else if(err instanceof Error && 'code' in err && err.code==='ENOTFOUND'){
+            return res.status(500).json({mensagem:"ERRO: Você digitou algo errado no host de conexão"})
+        }else if(err instanceof Error && 'code' in err && err.code==='ER_BAD_DB_ERROR'){
+            return res.status(500).json({mensagem:"ERRO: Confira o nome do banco de dados ou crie um banco com o nome que você passou na conexão"})
+        }else if(err instanceof Error && 'code' in err && err.code==='ER_ACCESS_DENIED_ERROR'){
+            return res.status(500).json({mensagem:"ERRO: Confira usuario e senha na conexão"})
+         }else if(err instanceof Error && 'code' in err && err.code==='ER_PARSE_ERROR'){
+            return res.status(500).json({mensagem:"ERRO: Você tem um erro na sua SQL, confira o Execute"})
+         }else if(err instanceof Error && 'code' in err && err.code==='ER_NO_SUCH_TABLE'){
+            return res.status(500).json({mensagem:"ERRO: Você digitou o nome da tabela errado, confira o Execute!"})
+        }else{
+            return res.status(500).json({mensagem:"ERRO: Desconhecido!"})
         }
+        console.log(err);
     }
 })
-app.post("/pessoas",(req,res)=>{
-    //Pegar as informações do usuário  => REQ.body
-    //Conectar com o banco
-    //Inserir
-    //Retornar algo que indique que deu certo
+app.post("/pessoas", async (req, res) => {
+    //Pegar as informações do usuário   => REQ.body
+    //inserir
+
+    const { id, nome } = req.body
+
+    //Validem o id e nome para não serem vazios.
+
+    try {
+        const [result] =
+            await connection
+                .execute<ResultSetHeader>('INSERT INTO pessoa VALUES (?,?)', [id, nome])
+        //Retornar algo que indique que deu certo
+         if (result.affectedRows === 0) 
+            return res.status(500).json({ mensagem: "Erro ao inserir!" })
+        return res.status(201).json({ mensagem: "Sucesso ao inserir!" })
+        
+    }catch(err){
+                if(err instanceof Error && 'code' in err && err.code==='ECONNREFUSED'){
+            return res.status(500).json({mensagem:"ERRO: Ligue o LARAGON e confira o usuário e senha da conexão"})
+        }else if(err instanceof Error && 'code' in err && err.code==='ENOTFOUND'){
+            return res.status(500).json({mensagem:"ERRO: Você digitou algo errado no host de conexão"})
+        }else if(err instanceof Error && 'code' in err && err.code==='ER_BAD_DB_ERROR'){
+            return res.status(500).json({mensagem:"ERRO: Confira o nome do banco de dados ou crie um banco com o nome que você passou na conexão"})
+        }else if(err instanceof Error && 'code' in err && err.code==='ER_ACCESS_DENIED_ERROR'){
+            return res.status(500).json({mensagem:"ERRO: Confira usuario e senha na conexão"})
+         }else if(err instanceof Error && 'code' in err && err.code==='ER_PARSE_ERROR'){
+            return res.status(500).json({mensagem:"ERRO: Você tem um erro na sua SQL, confira o Execute"})
+         }else if(err instanceof Error && 'code' in err && err.code==='ER_NO_SUCH_TABLE'){
+            return res.status(500).json({mensagem:"ERRO: Você digitou o nome da tabela errado, confira o Execute!"})
+        }else{
+            return res.status(500).json({mensagem:"ERRO: Desconhecido!"})
+        }
+        return res.status(500).json({ mensagem: "Erro ao inserir!" })
+    }
     
 })
-app.listen(8000,()=>{
+app.listen(8000, () => {
     console.log("Iniciando o servidor na porta 8000")
 })
 
-interface IPessoa extends RowDataPacket{
-    id:number,
-    nome:string,
-}
-
+/**
+ * No banco de dados 'luademel' crie uma nova tabela chamado produto
+ * Na tebela produto, crie os seguintes atributos:
+ * id INT
+ * nome VARCHAR(300)
+ * categoria VARCHAR(300)
+ * preco DECIMAL(10,2)
+ * data_criacao DATATIME
+ * data_modificacao DATATIME
+ *
+ * crie uma rota chamada `cadastro_produto` que eu possa enviar
+ * um JSON para cadastar um novo produto no banco de dadods
+ *
+ * Crie uma rota chamada `listar produtos´ que retorne todas os
+ * produtos cadastrados no banco de dados
+ *
+ * crie uma rota chamada ´listar_produtos_informatica´ que retorne
+ * todos os produtos da categoria informatica
+ *
+ * Crie uma rota chamada `cadastro_produto` que eu possa enviar
+ * um JSON para cadastrar um novo produto no banco de dados
+     */
