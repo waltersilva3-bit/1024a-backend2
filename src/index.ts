@@ -259,7 +259,10 @@ import mysql, { type RowDataPacket, type Connection, type ResultSetHeader } from
 import express, { type Response } from 'express';
 import connection from './mysql_connection.js';
 import MysqlErrorHandle from './mysql_error_handle.js';
+import cors from 'cors'
+
 const app = express()
+app.use(cors())
 app.use(express.json())
 
 interface IPessoa extends RowDataPacket {
@@ -276,7 +279,7 @@ interface IProduto extends RowDataPacket {
 }
 
 app.get("/pessoas", async (req, res) => {
-    try {
+try {
         const [dados, campos] =
             await connection.execute<IPessoa[]>('SELECT * FROM pessoa')
         res.status(200).json(dados)
@@ -349,6 +352,7 @@ app.listen(8000, () => {
  * um JSON para cadastrar um novo produto no banco de dados
 */
 
+/*
 app.post("/cadastro_produto", async (req, res) => {
     const { id, nome, categoria, preco, data_criacao, data_modificacao } = req.body
 
@@ -403,3 +407,27 @@ app.get("/listar_produtos_caros", async (req, res) => {
         mysqlErrorHandle.validar()
     }
 })
+
+*/
+
+import { type RowDataPacket, type ResultSetHeader } from 'mysql2/promise';
+import express from 'express';
+import connection from './mysql_connection.js';
+import MysqlErrorHandle from './mysql_error_handle.js';
+import cors from 'cors'
+const app = express()
+app.use(cors)
+app.use(express.json())
+
+interface IPessoa extends RowDataPacket {
+    id: number,
+    nome: string,
+}
+interface IProduto extends RowDataPacket {
+    id: number,
+    nome: string,
+    categoria: string,
+    preco: number,
+    data_criacao: Date,
+    data_modificacao: Date
+}
